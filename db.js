@@ -151,3 +151,68 @@ async function updateSessionStatus(id, status) {
 async function deleteSession(id) {
   await run('DELETE FROM sessions WHERE id = ?', [id]);
 }
+
+// ============================================================
+// DRIVER FUNCTIONS
+// ============================================================
+
+// Get all drivers in a session, sorted by car number(1-8 ascending).
+async function getDriversBySession(sessionId) {
+  return all(
+    'SELECT * FROM drivers WHERE session_id = ? ORDER BY car_number ASC',
+    [sessionId]
+  );
+}
+
+// Fetch a single driver by their UUID.
+async function getDriver(id) {
+  return get('SELECT * FROM drivers WHERE id = ?', [id]);
+}
+
+// Returns true if a driver with this name already exists in the session.
+// Pass excludeId when editing a driver so they can keep their own name.
+async function driverNameExists(sessionId, name, excludeId = null) {
+  let row;
+  if (excludeId) {
+    row = await get(
+      'SELECT id FROM drivers WHERE session_id = ? AND name = ? AND id != ?',
+      [sessionId, name, excludeId]
+    );
+  } else {
+    row = await get(
+      'SELECT id FROM drivers WHERE session_id = ? AND name = ?',
+      [sessionId, name]
+    );
+  }
+  return !!row;
+}
+
+// Returns an array of car numbers already in use for this session (e.g. [1, 3, 5]).
+async function getUsedCarNumbers(sessionId) {
+  const rows = await all(
+    'SELECT car_number FROM drivers WHERE session_id = ?',
+    [sessionId]
+  );
+  return rows.map(r => r.car_number);
+}
+
+// Insert a new driver.
+async function addDriver(id, sessionId, name, carNumber) {
+  await run(
+    'INSERT INTO drivers (id, session_id, name, car_number) VALUES (?, ?, ?, ?)',
+    [id, sessionId, name, carNumber]
+  );
+}
+
+// Update a driver's name and car number.
+async function updateDriver(id, name, carNumber) {
+  await run(
+    'UPDATE drivers SET name = ?, car_number = ? WHERE id = ?',
+    [name, carNumber, id]
+  );
+}
+
+// Remove a driver.
+async function removeDriver(id) {
+  await run('DELETE FROM drivers WHERE id = ?', [id]);
+}
