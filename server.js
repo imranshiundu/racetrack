@@ -44,3 +44,15 @@ Usage:
 `);
   process.exit(1); // Exit with error code 1 to signal failure
 }
+
+// ============================================================
+// Step 3: Determine race duration (dev mode vs production)
+// ============================================================
+// When started with "npm run dev", NODE_ENV is set to "development".
+// In dev mode the race lasts 1 minute (60,000ms) instead of 10 minutes (600,000ms).
+const IS_DEV = process.env.NODE_ENV === 'development';
+const RACE_DURATION = IS_DEV ? 60_000 : 600_000; // milliseconds
+const PORT = parseInt(process.env.PORT || '3000');
+
+console.log(`\nBeachside Racetrack — Starting in ${IS_DEV ? 'DEVELOPMENT' : 'PRODUCTION'} mode`);
+console.log(`Race duration: ${RACE_DURATION / 1000} seconds`);
