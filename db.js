@@ -114,3 +114,40 @@ async function initDb() {
 
   console.log('✅  Database tables initialized');
 }
+
+// ============================================================
+// SESSION FUNCTIONS
+// ============================================================
+
+// Get sessions, optionally filtered by status ('pending', 'active', 'ended').
+// Returns them sorted oldest-first.
+async function getSessions(status = null) {
+  if (status) {
+    return all('SELECT * FROM sessions WHERE status = ? ORDER BY created_at ASC', [status]);
+  }
+  return all('SELECT * FROM sessions ORDER BY created_at ASC', []);
+}
+
+// Fetch a single session by its UUID.
+async function getSession(id) {
+  return get('SELECT * FROM sessions WHERE id = ?', [id]);
+}
+
+// Insert a new session.
+// We pass created_at explicitly
+async function createSession(id, name) {
+  await run(
+    'INSERT INTO sessions (id, name, created_at) VALUES (?, ?, ?)',
+    [id, name, Date.now()]
+  );
+}
+
+// Change a session's status (pending → active → ended).
+async function updateSessionStatus(id, status) {
+  await run('UPDATE sessions SET status = ? WHERE id = ?', [status, id]);
+}
+
+// Delete a session (and its drivers/laps, thanks to CASCADE).
+async function deleteSession(id) {
+  await run('DELETE FROM sessions WHERE id = ?', [id]);
+}
