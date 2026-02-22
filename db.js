@@ -216,3 +216,23 @@ async function updateDriver(id, name, carNumber) {
 async function removeDriver(id) {
   await run('DELETE FROM drivers WHERE id = ?', [id]);
 }
+
+// ============================================================
+// LAP TIME FUNCTIONS
+// ============================================================
+
+// Record a lap-line crossing.
+async function recordLap(id, sessionId, carNumber, crossingTime) {
+  await run(
+    'INSERT INTO lap_times (id, session_id, car_number, crossing_time) VALUES (?, ?, ?, ?)',
+    [id, sessionId, carNumber, crossingTime]
+  );
+}
+
+// Get all crossings for a session in chronological order.
+async function getLapsForSession(sessionId) {
+  return all(
+    'SELECT * FROM lap_times WHERE session_id = ? ORDER BY crossing_time ASC',
+    [sessionId]
+  );
+}
