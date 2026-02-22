@@ -56,3 +56,14 @@ const PORT = parseInt(process.env.PORT || '3000');
 
 console.log(`\nBeachside Racetrack — Starting in ${IS_DEV ? 'DEVELOPMENT' : 'PRODUCTION'} mode`);
 console.log(`Race duration: ${RACE_DURATION / 1000} seconds`);
+
+// ============================================================
+// Imports
+// ============================================================
+const express = require('express');           // ExpressJS framework
+const http = require('http');                 // Node's built-in HTTP module
+const { Server } = require('socket.io');      // Real-time communication
+const path = require('path');                 // File path utilities
+
+const { initDb } = require('./db');
+const { setupSockets } = require('./socketHandlers');
