@@ -236,3 +236,23 @@ async function getLapsForSession(sessionId) {
     [sessionId]
   );
 }
+
+// ============================================================
+// RACE STATE FUNCTIONS
+// ============================================================
+
+// Returns the single race_state row (id=1).
+async function getRaceState() {
+  return get('SELECT * FROM race_state WHERE id = 1');
+}
+
+// Update one or more fields in race_state.
+// Example: setRaceState({ mode: 'hazard' })
+//          setRaceState({ mode: 'finish', ended_at: Date.now() })
+async function setRaceState(fields) {
+  const keys = Object.keys(fields);
+  const values = Object.values(fields);
+  if (keys.length === 0) return;
+  const setClause = keys.map(k => `${k} = ?`).join(', ');
+  await run(`UPDATE race_state SET ${setClause} WHERE id = 1`, values);
+}
