@@ -330,3 +330,28 @@ async function computeLeaderboard(sessionId) {
 
   return entries;
 }
+
+// ============================================================
+// EXPORTS
+// ============================================================
+module.exports = {
+  db,
+  initDb,
+  getSessions,
+  getSession,
+  createSession,
+  updateSessionStatus,
+  deleteSession,
+  getDriversBySession,
+  getDriver,
+  driverNameExists,
+  getUsedCarNumbers,
+  addDriver,
+  updateDriver,
+  removeDriver,
+  recordLap,
+  getLapsForSession,
+  getRaceState,
+  setRaceState,
+  computeLeaderboard,
+};
