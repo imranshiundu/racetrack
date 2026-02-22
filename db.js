@@ -256,3 +256,77 @@ async function setRaceState(fields) {
   const setClause = keys.map(k => `${k} = ?`).join(', ');
   await run(`UPDATE race_state SET ${setClause} WHERE id = 1`, values);
 }
+
+// ============================================================
+// LEADERBOARD CALCULATION
+// ============================================================
+
+/**
+ * computeLeaderboard(sessionId)
+ *
+ * How lap timing works:
+ *   - Each row in lap_times is one moment a car crossed the lap line.
+ *   - The FIRST crossing starts the clock for that car (lap 1 begins).
+ *   - Each SUBSEQUENT crossing completes a lap and starts the next.
+ *   - So: 1 crossing = 0 completed laps, 2 crossings = 1 completed lap, etc.
+ *
+ * Sorting rules (what makes a driver "ahead"):
+ *   1. More completed laps → always higher rank, regardless of lap time.
+ *   2. Same laps → faster best lap time wins.
+ *   3. No completed laps yet → sorted last (they haven't finished a lap).
+ *
+ * Returns an array of { car_number, driver_name, laps, fastest_lap_ms, current_lap }.
+ */
+async function computeLeaderboard(sessionId) {
+  const drivers = await getDriversBySession(sessionId);
+  const allLaps = await getLapsForSession(sessionId);
+
+  // Group crossing times by car number
+  const crossingsMap = new Map();
+  for (const driver of drivers) {
+    crossingsMap.set(driver.car_number, []);
+  }
+  for (const lap of allLaps) {
+    if (crossingsMap.has(lap.car_number)) {
+      crossingsMap.get(lap.car_number).push(lap.crossing_time);
+    }
+  }
+
+  // Build a leaderboard entry for each driver
+  const entries = drivers.map(driver => {
+    const crossings = crossingsMap.get(driver.car_number) || [];
+
+    // Each crossing after the first completes a lap
+    const completedLaps = Math.max(0, crossings.length - 1);
+
+    // Calculate time between consecutive crossings = individual lap durations
+    const lapDurations = [];
+    for (let i = 1; i < crossings.length; i++) {
+      lapDurations.push(crossings[i] - crossings[i - 1]);
+    }
+
+    // Fastest lap = best time ever. Last lap = most recently completed duration.
+    const fastestLap = lapDurations.length > 0 ? Math.min(...lapDurations) : null;
+    const lastLap = lapDurations.length > 0 ? lapDurations[lapDurations.length - 1] : null;
+
+    return {
+      car_number: driver.car_number,
+      driver_name: driver.name,
+      laps: completedLaps,
+      fastest_lap_ms: fastestLap,
+      last_lap_ms: lastLap,
+      current_lap: completedLaps + 1
+    };
+  });
+
+  // Sort: more laps → higher rank. Equal laps → faster last lap wins.
+  entries.sort((a, b) => {
+    if (b.laps !== a.laps) return b.laps - a.laps;
+    if (a.last_lap_ms !== null && b.last_lap_ms !== null) return a.last_lap_ms - b.last_lap_ms;
+    if (a.last_lap_ms !== null) return -1;
+    if (b.last_lap_ms !== null) return 1;
+    return 0;
+  });
+
+  return entries;
+}
