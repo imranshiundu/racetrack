@@ -1,3 +1,19 @@
+/**
+ * socketHandlers.js — Real-time communication layer
+ *
+ * All data between browser tabs flows through here via Socket.IO.
+ * No traditional REST API — every update is a socket event.
+ *
+ * Namespaces (like separate channels):
+ *   /public       — public displays, no auth
+ *   /front-desk   — receptionist (RECEPTIONIST_KEY)
+ *   /race-control — safety official (SAFETY_KEY)
+ *   /lap-tracker  — lap observer (OBSERVER_KEY)
+ *
+ * Flow: client emits an event → server validates + updates DB → broadcastState()
+ * sends the full state to every connected client so everyone stays in sync.
+ */
+
 'use strict';
 
 // ============================================================
@@ -179,6 +195,7 @@ async function setupSockets(ioServer, raceDurationMs) {
   }
 
   // ---- PUBLIC namespace ----
+
   nsPublic.on('connection', async (socket) => {
     console.log(`Public client connected: ${socket.id}`);
     await broadcastState();
@@ -186,6 +203,7 @@ async function setupSockets(ioServer, raceDurationMs) {
   });
 
   // ---- FRONT DESK namespace ----
+
   nsFrontDesk.on('connection', async (socket) => {
     console.log(`Front-desk connected: ${socket.id}`);
     await broadcastState();
@@ -307,6 +325,7 @@ async function setupSockets(ioServer, raceDurationMs) {
   });
 
   // ---- RACE CONTROL namespace ----
+
   nsRaceCtrl.on('connection', async (socket) => {
     console.log(`Race-control connected: ${socket.id}`);
     await broadcastState();
@@ -394,7 +413,9 @@ async function setupSockets(ioServer, raceDurationMs) {
 
     socket.on('disconnect', () => console.log(`Race-control disconnected: ${socket.id}`));
   });
+
   // ---- LAP TRACKER namespace (Observer) ----
+
   nsLapTracker.on('connection', async (socket) => {
     console.log(`Lap-tracker connected: ${socket.id}`);
     await broadcastState();
