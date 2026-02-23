@@ -394,5 +394,34 @@ async function setupSockets(ioServer, raceDurationMs) {
 
     socket.on('disconnect', () => console.log(`Race-control disconnected: ${socket.id}`));
   });
+  // ---- LAP TRACKER namespace (Observer) ----
+  nsLapTracker.on('connection', async (socket) => {
+    console.log(`Lap-tracker connected: ${socket.id}`);
+    await broadcastState();
 
-}
+    socket.on('lap:record', async ({ carNumber }) => {
+      try {
+        const raceState = await getRaceState();
+
+        // Only allow recording when the race is actively running
+        if (!raceState.current_session_id || raceState.mode === 'idle' || raceState.mode === 'finish') {
+          return socket.emit('error:msg', 'Race is finished — no more laps can be recorded');
+        }
+
+        await recordLap(uuidv4(), raceState.current_session_id, parseInt(carNumber), Date.now());
+        console.log(`Lap recorded: Car ${carNumber}`);
+        await broadcastState();
+      } catch (err) {
+        console.error('lap:record error:', err);
+        socket.emit('error:msg', 'Failed to record lap');
+      }
+    });
+
+      socket.on('disconnect', () => console.log(`Lap-tracker disconnected: ${socket.id}`));
+    });
+
+    await broadcastState();
+    console.log('Socket.IO handlers initialized');
+  }
+
+  module.exports = { setupSockets, broadcastState };
