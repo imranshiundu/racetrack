@@ -177,4 +177,12 @@ async function setupSockets(ioServer, raceDurationMs) {
       await setRaceState({ mode: 'finish', ended_at: Date.now() });
     }
   }
+
+  
+  // ---- PUBLIC namespace ----
+  nsPublic.on('connection', async (socket) => {
+    console.log(`Public client connected: ${socket.id}`);
+    await broadcastState();
+    socket.on('disconnect', () => console.log(`Public client disconnected: ${socket.id}`));
+  });
 }
