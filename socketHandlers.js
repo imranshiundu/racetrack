@@ -306,4 +306,93 @@ async function setupSockets(ioServer, raceDurationMs) {
     socket.on('disconnect', () => console.log(`Front-desk disconnected: ${socket.id}`));
   });
 
+  // ---- RACE CONTROL namespace ----
+  nsRaceCtrl.on('connection', async (socket) => {
+    console.log(`Race-control connected: ${socket.id}`);
+    await broadcastState();
+
+    // Start the first pending session
+    socket.on('race:start', async () => {
+      try {
+        const pending = await getSessions('pending');
+        if (pending.length === 0) return socket.emit('error:msg', 'No pending sessions to start');
+
+        const session = pending[0];
+        const drivers = await getDriversBySession(session.id);
+        if (drivers.length === 0) return socket.emit('error:msg', 'Add at least one driver before starting');
+
+        const now = Date.now();
+        await updateSessionStatus(session.id, 'active');
+        await setRaceState({
+          current_session_id: session.id,
+          mode: 'safe',
+          started_at: now,
+          ended_at: null,
+          duration_ms: raceDurationMs,
+        });
+        startRaceTimer(raceDurationMs, now);
+        console.log(`Race started: ${session.name} (${raceDurationMs / 1000}s)`);
+        await broadcastState();
+      } catch (err) {
+        console.error('race:start error:', err);
+        socket.emit('error:msg', 'Failed to start race');
+      }
+    });
+
+    // Change the current flag mode (safe / hazard / danger / finish)
+    socket.on('race:mode', async ({ mode }) => {
+      try {
+        const validModes = ['safe', 'hazard', 'danger', 'finish'];
+        if (!validModes.includes(mode)) return socket.emit('error:msg', `Invalid mode: ${mode}`);
+
+        const raceState = await getRaceState();
+        if (raceState.mode === 'finish') return socket.emit('error:msg', 'Race is finished — cannot change mode');
+        // Block if there is no active session (e.g. after race:end, mode is 'danger')
+        if (!raceState.current_session_id) return socket.emit('error:msg', 'No active race session');
+
+        const updates = { mode };
+        if (mode === 'finish') {
+          updates.ended_at = Date.now();
+          if (raceTimerInterval) { clearInterval(raceTimerInterval); raceTimerInterval = null; }
+        }
+
+        await setRaceState(updates);
+        console.log(`Mode changed to: ${mode}`);
+        await broadcastState();
+      } catch (err) {
+        console.error('race:mode error:', err);
+        socket.emit('error:msg', 'Failed to change race mode');
+      }
+    });
+
+    // End the session after Finish mode — cars are back in the pit
+    // Per spec: after ending, mode changes to 'danger' (track not yet cleared)
+    socket.on('race:end', async () => {
+      try {
+        const raceState = await getRaceState();
+        if (raceState.mode !== 'finish') return socket.emit('error:msg', 'Can only end a race that is in Finish mode');
+
+        if (raceState.current_session_id) {
+          await updateSessionStatus(raceState.current_session_id, 'ended');
+        }
+
+        // Spec says: "When the race session is ended, the race mode changes to Danger"
+        await setRaceState({
+          current_session_id: null,
+          mode: 'danger',
+          started_at: null,
+          ended_at: null,
+        });
+
+        console.log('Race session ended. Mode: danger.');
+        await broadcastState();
+      } catch (err) {
+        console.error('race:end error:', err);
+        socket.emit('error:msg', 'Failed to end race session');
+      }
+    });
+
+    socket.on('disconnect', () => console.log(`Race-control disconnected: ${socket.id}`));
+  });
+
 }
