@@ -83,3 +83,34 @@ async function broadcastState() {
     console.error('broadcastState error:', err);
   }
 }
+
+// ============================================================
+// startRaceTimer(durationMs, startedAt)
+// ============================================================
+// Runs every second. When time runs out, sets mode to 'finish' and broadcasts.
+// The actual countdown display is handled client-side from startedAt + durationMs.
+function startRaceTimer(durationMs, startedAt) {
+  if (raceTimerInterval) { clearInterval(raceTimerInterval); raceTimerInterval = null; }
+
+  raceTimerInterval = setInterval(async () => {
+    try {
+      const elapsed = Date.now() - startedAt;
+      const remaining = durationMs - elapsed;
+
+      if (remaining <= 0) {
+        clearInterval(raceTimerInterval);
+        raceTimerInterval = null;
+
+        const raceState = await getRaceState();
+        // Only auto-finish if something hasn't already finished/ended the race
+        if (raceState.mode !== 'finish' && raceState.mode !== 'idle') {
+          console.log('Race timer expired — auto-finishing');
+          await setRaceState({ mode: 'finish', ended_at: Date.now() });
+          await broadcastState();
+        }
+      }
+    } catch (err) {
+      console.error('Timer tick error:', err);
+    }
+  }, 1000);
+}
