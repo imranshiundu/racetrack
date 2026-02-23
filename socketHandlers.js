@@ -114,3 +114,37 @@ function startRaceTimer(durationMs, startedAt) {
     }
   }, 1000);
 }
+
+// ============================================================
+// setupAuthNamespace(path, expectedKey)
+// ============================================================
+// This helper function creates a Namespace for a specific
+// role, like the Safety Official or Receptionist. 
+//
+// It adds Middleware that checks if the user has the 
+// correct password before letting them in.
+function setupAuthNamespace(namespacePath, expectedKey) {
+  // 1. Create the restricted namespace (e.g., "/race-control")
+  const ns = io.of(namespacePath);
+
+  // 2. Add the Middleware
+  // This function runs every single time someone tries to connect to this namespace.
+  ns.use((socket, next) => {
+    // Check the "handshake" data sent by the browser. 
+    // We look specifically in the 'auth' pocket for the 'key'.
+    if (socket.handshake.auth.key === expectedKey) {
+      // SUCCESS: The keys match! Call next() to let them into the room.
+      console.log(`Authenticated connection to ${namespacePath}`);
+      next();
+    } else {
+      // FAILURE: The keys do NOT match.
+      console.warn(`Failed auth attempt on ${namespacePath}`);
+
+      // We add a 500ms (half-second) delay before telling them "No." This is a simple way to make brute-force attacks less effective.
+      setTimeout(() => next(new Error('AUTH_FAILED')), 500);
+    }
+  });
+
+  // Return the created namespace so we can use it elsewhere
+  return ns;
+}
