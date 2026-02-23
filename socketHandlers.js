@@ -148,3 +148,33 @@ function setupAuthNamespace(namespacePath, expectedKey) {
   // Return the created namespace so we can use it elsewhere
   return ns;
 }
+
+// ============================================================
+// setupSockets(ioServer, raceDurationMs) — main entry point
+// ============================================================
+async function setupSockets(ioServer, raceDurationMs) {
+  io = ioServer;
+
+  const RECEPTIONIST_KEY = process.env.RECEPTIONIST_KEY;
+  const OBSERVER_KEY = process.env.OBSERVER_KEY;
+  const SAFETY_KEY = process.env.SAFETY_KEY;
+
+  nsPublic = io.of('/public');
+  nsFrontDesk = setupAuthNamespace('/front-desk', RECEPTIONIST_KEY);
+  nsRaceCtrl = setupAuthNamespace('/race-control', SAFETY_KEY);
+  nsLapTracker = setupAuthNamespace('/lap-tracker', OBSERVER_KEY);
+
+  const raceState = await getRaceState();
+
+  // Resume timer if server restarted mid-race
+  if (raceState.started_at && !raceState.ended_at) {
+    const remaining = raceState.duration_ms - (Date.now() - raceState.started_at);
+    if (remaining > 0) {
+      console.log(`Resuming race timer — ${Math.round(remaining / 1000)}s left`);
+      startRaceTimer(raceState.duration_ms, raceState.started_at);
+    } else {
+      console.log('Race expired during downtime — finishing now');
+      await setRaceState({ mode: 'finish', ended_at: Date.now() });
+    }
+  }
+}
