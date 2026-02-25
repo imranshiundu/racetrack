@@ -39,7 +39,7 @@
         <!-- Optional button overlay for fullscreen -->
         <button
             class="fixed bottom-10 right-10 p-6 bg-black/20 hover:bg-black/40 rounded-3xl transition-all group backdrop-blur-md"
-            onclick="document.documentElement.requestFullscreen()">
+            onclick="maximizeControl()">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
                 class="group-hover:scale-110 transition-transform">
                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -53,7 +53,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/socket-client.js"></script>
     <script>
-        Racetrack.init('/public', (state) => {
+        Racetrack.initPublic((state) => {
             const surface = document.getElementById('flag-surface');
             surface.classList.remove('chequered');
 
@@ -76,6 +76,13 @@
                     break;
             }
         });
+        window.maximizeControl = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+            } else {
+                document.exitFullscreen();
+            }
+        };
     </script>
 </body>
 
