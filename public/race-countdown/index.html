@@ -69,7 +69,7 @@
         <div id="finish-msg"
             class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 pointer-events-none">
             <div
-                class="text-[12vw] md:text-[15vw] font-black italic tracking-tighter bg-white text-black px-4 md:px-12 py-2 md:py-4 shadow-2xl skew-x-[-10deg]">
+                class="text-[12vw] md:text-[15vw] font-black italic tracking-tighter bg-white text-black px-4 md:px-28 py-2 md:py-4 shadow-2xl skew-x-[-10deg]">
                 FINISH!</div>
         </div>
     </div>
@@ -81,7 +81,7 @@
     </div>
 
     <button class="fixed bottom-10 right-10 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group"
-        onclick="document.documentElement.requestFullscreen()">
+        onclick="maximizeControl()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
             class="group-hover:scale-110 transition-transform">
             <polyline points="15 3 21 3 21 9"></polyline>
@@ -97,7 +97,7 @@
         let timerInterval = null;
         let totalTime = 60000;
 
-        Racetrack.init('/public', (state) => {
+        Racetrack.initPublic((state) => {
             const timer = document.getElementById('timer');
             const label = document.getElementById('session-label');
             const progress = document.getElementById('progress-bar');
@@ -172,6 +172,13 @@
             const percent = ((totalTime - ms) / totalTime) * 100;
             progress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
         }
+        window.maximizeControl = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+            } else {
+                document.exitFullscreen();
+            }
+        };
     </script>
 </body>
 
