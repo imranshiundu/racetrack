@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Next Race — Beachside Racetrack</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/dist/output.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
@@ -33,9 +33,21 @@
                 STANDING BY</div>
             <h1 class="text-7xl font-black tracking-tighter">NEXT RACE</h1>
         </div>
-        <div class="text-right pb-2">
+        <div class="flex items-center gap-6 pb-2">
             <h2 id="session-name" class="text-4xl font-extrabold text-indigo-500 tracking-tight italic">--</h2>
+            <button
+                class="w-12 h-12 md:w-16 md:h-16 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all group"
+                onclick="maximizeControl()">
+                <svg width="20" height="20" md:width="24" md:height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="3" class="group-hover:scale-110 transition-transform">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+            </button>
         </div>
+
     </header>
 
     <main id="drivers-grid" class="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -62,16 +74,32 @@
     <script src="/socket-client.js"></script>
     <script>
         const CAR_AVATARS = { 1: '🏎️', 2: '🏎️', 3: '🏎️', 4: '🏎️', 5: '🏎️', 6: '🏎️', 7: '🏎️', 8: '🏎️' };
-        const CAR_COLORS = { 1: 'bg-red-500', 2: 'bg-blue-500', 3: 'bg-green-500', 4: 'bg-yellow-500', 5: 'bg-purple-500', 6: 'bg-orange-500', 7: 'bg-pink-500', 8: 'bg-cyan-500' };
+        const CAR_SVG = (colorClass) => `
+            <svg viewBox="0 0 24 24" fill="none" class="w-8 h-8 ${colorClass}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h2" />
+                <circle cx="7" cy="17" r="2" />
+                <path d="M9 17h6" />
+                <circle cx="17" cy="17" r="2" />
+            </svg>
+        `;
 
-        Racetrack.init('/public', (state) => {
+        const CAR_COLORS = {
+            1: 'text-red-500', 2: 'text-blue-500', 3: 'text-green-500', 4: 'text-yellow-500',
+            5: 'text-purple-500', 6: 'text-orange-500', 7: 'text-pink-500', 8: 'text-cyan-500'
+        };
+
+        const CAR_BG_COLORS = {
+            1: 'bg-red-500/10', 2: 'bg-blue-500/10', 3: 'bg-green-500/10', 4: 'bg-yellow-500/10',
+            5: 'bg-purple-500/10', 6: 'bg-orange-500/10', 7: 'bg-pink-500/10', 8: 'bg-cyan-500/10'
+        };
+        Racetrack.initPublic((state) => {
             const grid = document.getElementById('drivers-grid');
             const sessionName = document.getElementById('session-name');
             const alertZone = document.getElementById('alert-zone');
             const statusPill = document.getElementById('status-pill');
 
             // Requirement: If race is ended (Danger mode), show current session with "Proceed to Paddock"
-            // NextSession logic: 
+            // NextSession logic:
             // - If race active: show Next session (waiting display)
             // - If race danger/idle: show Next session (briefing display)
             // Spec: "Once the race session is ended... The Next Race screen now displays the current session's drivers [which is now the upcoming one], and displays an extra message to tell them to proceed to the paddock."
@@ -107,16 +135,36 @@
                 statusPill.className = "inline-block px-4 py-1.5 bg-slate-800 text-slate-400 rounded-full text-[10px] font-black tracking-[0.3em] uppercase mb-4 border border-white/5 transition-all";
             }
 
-            grid.innerHTML = drivers.map(d => `
-                <div class="driver-card bg-slate-900 shadow-2xl rounded-[3rem] p-10 border border-white/5 flex flex-col items-center justify-center text-center hover:border-indigo-500/50 hover:-translate-y-2">
-                    <div class="w-32 h-32 rounded-[2rem] ${CAR_COLORS[d.car_number]} mb-8 flex items-center justify-center text-6xl shadow-inner border-8 border-white/10">
-                        ${CAR_AVATARS[d.car_number]}
+            grid.innerHTML = drivers.map(d => {
+            	const carNum = Number(d.car_number);
+
+                return `
+                    <div class="driver-card bg-slate-900 shadow-2xl rounded-[3rem] p-10 border border-white/5 flex flex-col items-center justify-center text-center transition-all duration-300 hover:border-indigo-500/50 hover:-translate-y-2">
+                        <div class="w-32 h-32 rounded-[2.5rem] ${CAR_BG_COLORS[carNum] || 'bg-slate-800'} mb-8 flex items-center justify-center shadow-inner border-4 border-white/10">
+                            <div class="transform scale-150">
+                                ${CAR_SVG(CAR_COLORS[carNum])}
+                            </div>
+                        </div>
+
+                        <div class="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase mb-3">
+                            CAR UNIT NO. 00${d.car_number}
+                        </div>
+
+                        <div class="text-3xl font-black tracking-tight leading-tight text-white">
+                            ${d.name}
+                        </div>
                     </div>
-                    <div class="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase mb-3">CAR NO. ${d.car_number}</div>
-                    <div class="text-3xl font-black tracking-tight leading-tight">${d.name}</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         });
+
+        window.maximizeControl = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+            } else {
+                document.exitFullscreen();
+            }
+        };
     </script>
 </body>
 
