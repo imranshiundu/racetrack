@@ -82,6 +82,7 @@ console.log(`Race duration: ${RACE_DURATION / 1000} seconds`);
 // ============================================================
 const express = require('express');    // Web framework (base for http server)
 const http = require('http');       // Node's built-in HTTP module
+const path = require('path');       // Node's built-in Path module
 const { Server } = require('socket.io'); // Real-time communication library
 
 const { initDb } = require('./db');
@@ -95,6 +96,27 @@ const { setupSockets } = require('./socketHandlers');
 // connections are served from the same port.
 const app = express();
 const server = http.createServer(app);
+
+// ============================================================
+// Step 4.5: Serve Static Files and UI Routes
+// ============================================================
+// Serve everything in the /public folder (CSS, Client JS, Images)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Explicitly handle UI routes by serving their index.html files.
+// This ensures that navigating to /front-desk directly works.
+const UI_ROUTES = [
+  '/front-desk', '/race-control', '/lap-line-tracker',
+  '/leader-board', '/next-race', '/race-countdown', '/race-flags'
+];
+
+UI_ROUTES.forEach(route => {
+  app.get(route, (req, res) => {
+    // Each route corresponds to a folder in /public with an index.html
+    const folder = route.startsWith('/') ? route.substring(1) : route;
+    res.sendFile(path.join(__dirname, 'public', folder, 'index.html'));
+  });
+});
 
 // ============================================================
 // Step 5: Configure Socket.IO

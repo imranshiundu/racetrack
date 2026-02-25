@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Flag — Beachside Racetrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            background-color: #020617;
+            overflow: hidden;
+        }
+
+        .flag-surface {
+            width: 100vw;
+            height: 100vh;
+            transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chequered {
+            background-color: white;
+            background-image:
+                linear-gradient(45deg, #000 25%, transparent 25%),
+                linear-gradient(-45deg, #000 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #000 75%),
+                linear-gradient(-45deg, transparent 75%, #000 75%);
+            background-size: 200px 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="flag-surface" class="flag-surface">
+        <!-- Optional button overlay for fullscreen -->
+        <button
+            class="fixed bottom-10 right-10 p-6 bg-black/20 hover:bg-black/40 rounded-3xl transition-all group backdrop-blur-md"
+            onclick="document.documentElement.requestFullscreen()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                class="group-hover:scale-110 transition-transform">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+        </button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket-client.js"></script>
+    <script>
+        Racetrack.init('/public', (state) => {
+            const surface = document.getElementById('flag-surface');
+            surface.classList.remove('chequered');
+
+            switch (state.raceState.mode) {
+                case 'safe':
+                    surface.style.backgroundColor = '#10b981'; // Green
+                    break;
+                case 'hazard':
+                    surface.style.backgroundColor = '#fbbf24'; // Yellow
+                    break;
+                case 'danger':
+                    surface.style.backgroundColor = '#ef4444'; // Red
+                    break;
+                case 'finish':
+                    surface.style.backgroundColor = '';
+                    surface.classList.add('chequered');
+                    break;
+                default:
+                    surface.style.backgroundColor = '#020617'; // Idle/Dark
+                    break;
+            }
+        });
+    </script>
+</body>
+
+</html>

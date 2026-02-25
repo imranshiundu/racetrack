@@ -1,0 +1,186 @@
+.race-interface {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 3rem;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .race-interface {
+        grid-template-columns: 1fr;
+    }
+}
+
+.main-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Flag Buttons */
+.flag-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.flag-btn {
+    aspect-ratio: 16/10;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 4px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.flag-btn span {
+    font-size: 1.25rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    z-index: 2;
+}
+
+.flag-safe {
+    background: var(--success);
+    color: white;
+}
+
+.flag-hazard {
+    background: var(--hazard);
+    color: black;
+}
+
+.flag-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.flag-finish {
+    background: white;
+    color: black;
+    background-image:
+        linear-gradient(45deg, #000 25%, transparent 25%),
+        linear-gradient(-45deg, #000 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #000 75%),
+        linear-gradient(-45deg, transparent 75%, #000 75%);
+    background-size: 30px 30px;
+}
+
+.flag-finish span {
+    background: white;
+    padding: 0.25rem 0.5rem;
+}
+
+.active-flag {
+    border-color: white;
+    transform: scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.active-flag::after {
+    content: 'ACTIVE';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Timer Display */
+.timer-container {
+    text-align: center;
+    padding: 3rem;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#timer-display {
+    font-family: var(--font-mono);
+    font-size: 6rem;
+    font-weight: 900;
+    color: var(--text-secondary);
+}
+
+#timer-display.running {
+    color: var(--accent);
+}
+
+/* Side Card Info */
+.info-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.status-card {
+    padding: 1.5rem;
+}
+
+.status-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+}
+
+.status-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.briefing-card {
+    padding: 1.5rem;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: var(--radius);
+}
+
+.briefing-card .label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.briefing-card .val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.drivers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.drivers-list span {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 2px solid var(--danger);
+    color: var(--danger);
+}
+
+.btn-outline-danger:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.giant {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}

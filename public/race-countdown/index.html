@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Countdown — Beachside Racetrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=JetBrains+Mono:wght@800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+        }
+
+        .timer-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glitch {
+            text-shadow: 0.05em 0 0 rgba(255, 0, 0, .75),
+                -0.025em -0.05em 0 rgba(0, 255, 0, .75),
+                0.025em 0.05em 0 rgba(0, 0, 255, .75);
+            animation: glitch 500ms infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: 0.05em 0 0 rgba(255, 0, 0, .75), -0.025em -0.05em 0 rgba(0, 255, 0, .75), 0.025em 0.05em 0 rgba(0, 0, 255, .75);
+            }
+
+            14% {
+                text-shadow: 0.05em 0 0 rgba(255, 0, 0, .75), -0.025em -0.05em 0 rgba(0, 255, 0, .75), 0.025em 0.05em 0 rgba(0, 0, 255, .75);
+            }
+
+            15% {
+                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, .75), 0.025em 0.025em 0 rgba(0, 255, 0, .75), -0.05em -0.05em 0 rgba(0, 0, 255, .75);
+            }
+
+            49% {
+                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, .75), 0.025em 0.025em 0 rgba(0, 255, 0, .75), -0.05em -0.05em 0 rgba(0, 0, 255, .75);
+            }
+
+            50% {
+                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, .75), 0.05em 0 0 rgba(0, 255, 0, .75), 0 -0.05em 0 rgba(0, 0, 255, .75);
+            }
+
+            99% {
+                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, .75), 0.05em 0 0 rgba(0, 255, 0, .75), 0 -0.05em 0 rgba(0, 0, 255, .75);
+            }
+
+            100% {
+                text-shadow: -0.025em 0 0 rgba(255, 0, 0, .75), -0.025em -0.025em 0 rgba(0, 255, 0, .75), -0.025em -0.05em 0 rgba(0, 0, 255, .75);
+            }
+        }
+    </style>
+</head>
+
+<body class="text-white h-screen flex flex-col items-center justify-center p-20 overflow-hidden">
+    <div id="session-label"
+        class="text-4xl font-black italic tracking-widest text-indigo-500 mb-8 uppercase opacity-50">NO RACE ACTIVE
+    </div>
+
+    <div class="relative w-full flex items-center justify-center overflow-hidden">
+        <div id="timer"
+            class="timer-font text-[25vw] md:text-[30vw] font-black leading-none tracking-tighter whitespace-nowrap transition-all duration-300">
+            00:00</div>
+        <div id="finish-msg"
+            class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-500 pointer-events-none">
+            <div
+                class="text-[12vw] md:text-[15vw] font-black italic tracking-tighter bg-white text-black px-4 md:px-12 py-2 md:py-4 shadow-2xl skew-x-[-10deg]">
+                FINISH!</div>
+        </div>
+    </div>
+
+    <div id="progress-bar-container"
+        class="w-full max-w-5xl h-4 bg-white/5 rounded-full mt-20 overflow-hidden border border-white/5">
+        <div id="progress-bar"
+            class="h-full bg-indigo-600 transition-all duration-1000 w-0 shadow-[0_0_20px_rgba(79,70,229,0.5)]"></div>
+    </div>
+
+    <button class="fixed bottom-10 right-10 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group"
+        onclick="document.documentElement.requestFullscreen()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            class="group-hover:scale-110 transition-transform">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+    </button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket-client.js"></script>
+    <script>
+        let timerInterval = null;
+        let totalTime = 60000;
+
+        Racetrack.init('/public', (state) => {
+            const timer = document.getElementById('timer');
+            const label = document.getElementById('session-label');
+            const progress = document.getElementById('progress-bar');
+            const finishMsg = document.getElementById('finish-msg');
+
+            totalTime = state.raceState.duration_ms || 60000;
+
+            if (state.currentSession) {
+                label.innerText = state.currentSession.name;
+                label.classList.remove('opacity-50');
+
+                if (state.raceState.mode === 'finish') {
+                    finishMsg.classList.remove('opacity-0');
+                    timer.classList.add('opacity-10');
+                    progress.style.width = '100%';
+                    clearInterval(timerInterval);
+                } else {
+                    finishMsg.classList.add('opacity-0');
+                    timer.classList.remove('opacity-10');
+                    syncTimer(state.timerRemaining);
+                }
+            } else {
+                label.innerText = "WAITING FOR START";
+                label.classList.add('opacity-50');
+                timer.innerText = "00:00";
+                timer.classList.remove('text-indigo-500', 'glitch');
+                progress.style.width = '0%';
+                finishMsg.classList.add('opacity-0');
+                clearInterval(timerInterval);
+            }
+        });
+
+        function syncTimer(ms) {
+            clearInterval(timerInterval);
+            const display = document.getElementById('timer');
+            const progress = document.getElementById('progress-bar');
+
+            let local = ms;
+            updateUI(local);
+
+            timerInterval = setInterval(() => {
+                local -= 1000;
+                if (local <= 0) {
+                    updateUI(0);
+                    clearInterval(timerInterval);
+                } else {
+                    updateUI(local);
+                }
+            }, 1000);
+        }
+
+        function updateUI(ms) {
+            const display = document.getElementById('timer');
+            const progress = document.getElementById('progress-bar');
+
+            const totalSec = Math.ceil(ms / 1000);
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+
+            display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+            // Pulse color when low on time
+            if (ms < 30000) {
+                display.classList.add('text-red-500');
+                display.classList.remove('text-white');
+            } else {
+                display.classList.remove('text-red-500');
+                display.classList.add('text-white');
+            }
+
+            // Sync progress bar
+            const percent = ((totalTime - ms) / totalTime) * 100;
+            progress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+        }
+    </script>
+</body>
+
+</html>

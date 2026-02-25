@@ -55,10 +55,8 @@ async function broadcastState() {
     }
 
     // Timer — how many ms are left in the race
-    let timerRemaining = raceState.duration_ms;
-    if (raceState.started_at && raceState.ended_at) {
-      timerRemaining = 0;
-    } else if (raceState.started_at && !raceState.ended_at) {
+    let timerRemaining = 0;
+    if (raceState.started_at && !raceState.ended_at) {
       timerRemaining = Math.max(0, raceState.duration_ms - (Date.now() - raceState.started_at));
     }
 
@@ -424,9 +422,11 @@ async function setupSockets(ioServer, raceDurationMs) {
       try {
         const raceState = await getRaceState();
 
-        // Only allow recording when the race is actively running
-        if (!raceState.current_session_id || raceState.mode === 'idle' || raceState.mode === 'finish') {
-          return socket.emit('error:msg', 'Race is finished — no more laps can be recorded');
+        // Only allow recording when a session is active.
+        // NOTE: Per requirement, laps CAN still be recorded in "finish" mode,
+        // but must NOT be recorded after the session is explicitly ended (mode reset to danger/idle).
+        if (!raceState.current_session_id || raceState.mode === 'idle') {
+          return socket.emit('error:msg', 'No active session — cannot record laps');
         }
 
         await recordLap(uuidv4(), raceState.current_session_id, parseInt(carNumber), Date.now());
@@ -438,11 +438,11 @@ async function setupSockets(ioServer, raceDurationMs) {
       }
     });
 
-      socket.on('disconnect', () => console.log(`Lap-tracker disconnected: ${socket.id}`));
-    });
+    socket.on('disconnect', () => console.log(`Lap-tracker disconnected: ${socket.id}`));
+  });
 
-    await broadcastState();
-    console.log('Socket.IO handlers initialized');
-  }
+  await broadcastState();
+  console.log('Socket.IO handlers initialized');
+}
 
-  module.exports = { setupSockets, broadcastState };
+module.exports = { setupSockets, broadcastState };
