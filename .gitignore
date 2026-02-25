@@ -4,6 +4,9 @@ node_modules/
 # Environment variables
 .env
 
+# Build output
+dist/
+
 # SQLite database files
 racetrack.db
 racetrack.db-shm
