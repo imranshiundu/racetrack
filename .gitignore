@@ -5,7 +5,7 @@ node_modules/
 .env
 
 # Build output
-dist/
+/public/dist/*
 
 # SQLite database files
 racetrack.db
