@@ -37,18 +37,18 @@
     <header class="flex flex-col lg:flex-row items-center justify-between mb-2 gap-8 text-center lg:text-left">
         <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
             <h1
-                class="text-4xl md:text-6xl font-black tracking-tighter italic bg-gradient-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent underline decoration-indigo-500/30 pr-4">
-                LEADERBOARD</h1>
+                class="text-4xl md:text-6xl font-black tracking-tighter italic bg-gradient-to-r from-indigo-500 to-emerald-400 bg-clip-text text-transparent underline decoration-indigo-500/30 pr-4">LEADERBOARD</h1>
             <div id="flag-display"
-                class="px-6 py-2 md:px-8 md:py-3 rounded-2xl text-lg md:text-2xl font-black uppercase tracking-[0.2em] shadow-2xl border-2 border-white/10 transition-all duration-700">
-                SAFE</div>
+                class="px-6 py-2 md:px-8 md:py-3 rounded-2xl text-lg md:text-2xl font-black uppercase tracking-[0.2em] shadow-2xl border-2 border-white/10 transition-all duration-700">SAFE</div>
         </div>
         <div class="flex items-center gap-6 md:gap-10">
+            <div id="connection-status" class="flex items-center gap-2 bg-white/5 rounded-3xl p-4">
+                <div class="w-6 h-6 rounded-full bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.8)]"></div>
+                <span id="connection-text" class="text-3xl font-bold text-slate-400">Connecting...</span>
+            </div>
             <div class="text-center lg:text-right">
-                <div class="text-slate-500 font-black text-[10px] md:text-xs tracking-widest uppercase mb-1">TIME
-                    REMAINING</div>
-                <div id="timer" class="timer-font text-4xl md:text-6xl font-black tracking-tight text-white">00:00.0
-                </div>
+                <div class="text-slate-500 font-black text-[10px] md:text-xs tracking-widest uppercase mb-1">TIME REMAINING</div>
+                <div id="timer" class="timer-font text-4xl md:text-6xl font-black tracking-tight text-white">00:00.0</div>
             </div>
             <button
                 class="w-12 h-12 md:w-16 md:h-16 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all group"

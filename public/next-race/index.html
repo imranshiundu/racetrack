@@ -35,17 +35,6 @@
         </div>
         <div class="flex items-center gap-6 pb-2">
             <h2 id="session-name" class="text-4xl font-extrabold text-indigo-500 tracking-tight italic">--</h2>
-            <button
-                class="w-12 h-12 md:w-16 md:h-16 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all group"
-                onclick="maximizeControl()">
-                <svg width="20" height="20" md:width="24" md:height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="3" class="group-hover:scale-110 transition-transform">
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <polyline points="9 21 3 21 3 15"></polyline>
-                    <line x1="21" y1="3" x2="14" y2="10"></line>
-                    <line x1="3" y1="21" x2="10" y2="14"></line>
-                </svg>
-            </button>
         </div>
 
     </header>
@@ -68,6 +57,22 @@
             <div class="px-8 py-3 bg-white text-indigo-600 rounded-2xl font-black tracking-widest text-lg">BRIEFING NOW
             </div>
         </div>
+    </div>
+
+    <button class="fixed bottom-10 right-10 p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all group"
+        onclick="maximizeControl()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            class="group-hover:scale-110 transition-transform">
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <polyline points="9 21 3 21 3 15"></polyline>
+            <line x1="21" y1="3" x2="14" y2="10"></line>
+            <line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+    </button>
+
+    <div id="connection-status" class="fixed bottom-10 left-10 flex items-center gap-2 bg-white/5 rounded-3xl p-4">
+        <div class="w-6 h-6 rounded-full bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.8)]"></div>
+        <span id="connection-text" class="text-3xl font-bold text-slate-400">Connecting...</span>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
