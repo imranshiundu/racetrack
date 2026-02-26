@@ -61,9 +61,18 @@ window.Racetrack = {
 	},
 
     // For public display pages
-    initPublic: function(onStateUpdate) {
+    initPublic: function (onStateUpdate) {
+        // Hide connecting message on connect event
+        const setStatus = (connected) => {
+            const connectionStatusDot = document.getElementById('connection-status');
+            if (!connectionStatusDot) { return };
+            connectionStatusDot.classList.toggle('hidden', connected);
+        };
+
         this.socket = io('/public');
-		this.socket.on('state:full', onStateUpdate);
+        this.socket.on('connect', () => setStatus(true));
+        this.socket.on('disconnect', () => setStatus(false));
+        this.socket.on('state:full', onStateUpdate);
 		this.socket.on('error:msg', (msg) => {
 	        alert('Server Error: ' + msg);
 	    });

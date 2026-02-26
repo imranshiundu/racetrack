@@ -36,11 +36,10 @@
 
 <body>
     <div id="flag-surface" class="flag-surface">
-        <!-- Optional button overlay for fullscreen -->
-        <button
-            class="fixed bottom-10 right-10 p-6 bg-black/20 hover:bg-black/40 rounded-3xl transition-all group backdrop-blur-md"
+        <!-- button overlay for fullscreen -->
+        <button class="fixed bottom-10 right-10 p-4 backdrop-invert-10 hover:backdrop-invert-20 backdrop-blur-3xl rounded-2xl transition-all group"
             onclick="maximizeControl()">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
                 class="group-hover:scale-110 transition-transform">
                 <polyline points="15 3 21 3 21 9"></polyline>
                 <polyline points="9 21 3 21 3 15"></polyline>
@@ -48,6 +47,11 @@
                 <line x1="3" y1="21" x2="10" y2="14"></line>
             </svg>
         </button>
+        <!-- button overlay for connection status -->
+        <div id="connection-status" class="fixed bottom-10 left-10 flex items-center gap-2 backdrop-invert-10 backdrop-blur-3xl rounded-3xl p-4">
+            <div class="w-6 h-6 rounded-full bg-red-500 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.8)]"></div>
+            <span id="connection-text" class="text-3xl font-bold text-slate-400">Connecting...</span>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
