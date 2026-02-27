@@ -32,7 +32,7 @@ window.Racetrack = {
             });
 
             this.socket.on('connect_error', (err) => {
-				console.error('Auth failed', err.message);
+                console.error('Auth failed', err.message);
                 authError.innerText = 'Incorrect Access Key or Server offline, Please try again.';
                 this.socket.disconnect();
             });
@@ -43,14 +43,14 @@ window.Racetrack = {
 
             this.socket.on('error:msg', (msg) => {
                 alert('Server Error: ' + msg);
-			});
+            });
 
             this.socket.on('disconnect', () => {
-				console.log('Disconnected');
-				authError.innerText = 'Server offline, Please try again.';
-				authOverlay.style.opacity = '1';
-				authOverlay.classList.remove('hidden');
-				this.socket = null;
+                console.log('Disconnected');
+                authError.innerText = 'Server offline, Please try again.';
+                authOverlay.style.opacity = '1';
+                authOverlay.classList.remove('hidden');
+                this.socket = null;
             });
         });
 
@@ -58,7 +58,7 @@ window.Racetrack = {
         authInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') authButton.click();
         });
-	},
+    },
 
     // For public display pages
     initPublic: function (onStateUpdate) {
@@ -73,9 +73,9 @@ window.Racetrack = {
         this.socket.on('connect', () => setStatus(true));
         this.socket.on('disconnect', () => setStatus(false));
         this.socket.on('state:full', onStateUpdate);
-		this.socket.on('error:msg', (msg) => {
-	        alert('Server Error: ' + msg);
-	    });
+        this.socket.on('error:msg', (msg) => {
+            alert('Server Error: ' + msg);
+        });
     },
 
     // Utility to emit events
