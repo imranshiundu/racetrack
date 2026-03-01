@@ -52,7 +52,7 @@ window.Racetrack = {
 
             this.socket.on('disconnect', () => {
                 console.log('Disconnected');
-                authError.innerText = 'Server offline, Please try again.';
+                authError.innerText = 'Connection lost, Please try again.';
                 authOverlay.style.opacity = '1';
                 authOverlay.classList.remove('hidden');
                 this.socket = null;
