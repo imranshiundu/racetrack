@@ -322,12 +322,11 @@ async function computeLeaderboard(sessionId) {
     };
   });
 
-  // Sort: more laps → higher rank. Equal laps → faster last lap wins.
+  // Sort: faster last lap wins.
   entries.sort((a, b) => {
-    if (b.laps !== a.laps) return b.laps - a.laps;
-    if (a.last_lap_ms !== null && b.last_lap_ms !== null) return a.last_lap_ms - b.last_lap_ms;
-    if (a.last_lap_ms !== null) return -1;
-    if (b.last_lap_ms !== null) return 1;
+    if (a.fastest_lap_ms !== null && b.fastest_lap_ms !== null) return a.fastest_lap_ms - b.fastest_lap_ms;
+    if (a.fastest_lap_ms !== null) return -1;
+    if (b.fastest_lap_ms !== null) return 1;
     return 0;
   });
 
