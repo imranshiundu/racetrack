@@ -271,9 +271,8 @@ async function setRaceState(fields) {
  *   - So: 1 crossing = 0 completed laps, 2 crossings = 1 completed lap, etc.
  *
  * Sorting rules (what makes a driver "ahead"):
- *   1. More completed laps → always higher rank, regardless of lap time.
- *   2. Same laps → faster best lap time wins.
- *   3. No completed laps yet → sorted last (they haven't finished a lap).
+ *   1. Faster best lap time wins.
+ *   2. No completed laps yet → sorted last (they haven't finished a lap).
  *
  * Returns an array of { car_number, driver_name, laps, fastest_lap_ms, current_lap }.
  */
