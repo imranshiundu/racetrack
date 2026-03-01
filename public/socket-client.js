@@ -55,7 +55,6 @@ window.Racetrack = {
                 authError.innerText = 'Connection lost, Please try again.';
                 authOverlay.style.opacity = '1';
                 authOverlay.classList.remove('hidden');
-                this.socket = null;
             });
         });
 
