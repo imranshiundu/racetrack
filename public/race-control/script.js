@@ -55,6 +55,12 @@
 
         // Active Session Logic
         if (state.currentSession) {
+            // Enable race mode buttons
+	        ['safe', 'hazard', 'danger', 'finish'].forEach(raceMode => {
+	            document.getElementById(`btn-${raceMode}`).disabled = false;
+	            document.getElementById(`btn-${raceMode}`).classList.remove('opacity-30', 'cursor-not-allowed');
+            });
+
             statusText.innerText = `RACE IN PROGRESS`;
             statusText.classList.remove('text-slate-500');
             statusText.classList.add('text-emerald-400');
@@ -67,6 +73,13 @@
                 actionArea.innerHTML = renderActionBtn('Emergency Finish', 'bg-slate-800 hover:bg-red-900', "Racetrack.emit('race:mode', {mode:'finish'})");
             }
         } else {
+            // Disable race mode buttons
+	        ['safe', 'hazard', 'danger', 'finish'].forEach(raceMode => {
+	            const btn = document.getElementById(`btn-${raceMode}`);
+	            btn.disabled = true;
+	            btn.classList.add('opacity-30', 'cursor-not-allowed');
+            });
+
             statusText.innerText = `READY TO START`;
             statusText.classList.remove('text-emerald-400');
             statusText.classList.add('text-slate-500');
