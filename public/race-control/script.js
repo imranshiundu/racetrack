@@ -68,18 +68,17 @@
             driverStatus.innerText = `${state.currentDrivers.length} Cars on Track`;
 
             if (state.raceState.mode === 'finish') {
+            // Disable race mode buttons
+		        ['safe', 'hazard', 'danger', 'finish'].forEach(raceMode => {
+		            const btn = document.getElementById(`btn-${raceMode}`);
+		            btn.disabled = true;
+		            btn.classList.add('opacity-30', 'cursor-not-allowed');
+	            });
                 actionArea.innerHTML = renderActionBtn('Declare Race Over', 'bg-red-600 hover:bg-red-500', "Racetrack.emit('race:end')");
             } else {
                 actionArea.innerHTML = renderActionBtn('Emergency Finish', 'bg-slate-800 hover:bg-red-900', "Racetrack.emit('race:mode', {mode:'finish'})");
             }
         } else {
-            // Disable race mode buttons
-	        ['safe', 'hazard', 'danger', 'finish'].forEach(raceMode => {
-	            const btn = document.getElementById(`btn-${raceMode}`);
-	            btn.disabled = true;
-	            btn.classList.add('opacity-30', 'cursor-not-allowed');
-            });
-
             statusText.innerText = `READY TO START`;
             statusText.classList.remove('text-emerald-400');
             statusText.classList.add('text-slate-500');
