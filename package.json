@@ -7,7 +7,7 @@
     "build:css": "npx @tailwindcss/cli -i ./src/styles/input.css -o ./public/dist/output.css --minify",
     "watch:css": "npx @tailwindcss/cli -i ./src/styles/input.css -o ./public/dist/output.css --watch",
     "start": "npm run build:css && node server.js",
-    "dev": "concurrently -n \"CSS,SRV\" \"npm run watch:css\" \"cross-env NODE_ENV=development node server.js\""
+    "dev": "concurrently --kill-others-on-fail -n \"CSS,SRV\" \"npm run watch:css\" \"cross-env NODE_ENV=development node server.js\""
   },
   "dependencies": {
     "cross-env": "^7.0.3",
