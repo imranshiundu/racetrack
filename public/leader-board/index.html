@@ -145,7 +145,9 @@
                     </div>
                     <div class="col-span-2 text-right">
                         <div class="text-xl md:text-4xl font-black timer-font text-slate-300">${entry.laps}</div>
-                        <div class="hidden md:block text-[10px] font-black text-slate-600 tracking-widest mt-1 uppercase">LAPS</div>
+                        <div class="hidden md:block text-[10px] font-black text-slate-600 tracking-widest mt-1 uppercase">LAPS DONE</div>
+                        <div class="text-xl md:text-4xl font-black timer-font text-slate-300">${entry.current_lap}</div>
+                        <div class="hidden md:block text-[10px] font-black text-slate-600 tracking-widest mt-1 uppercase">CURRENT LAP</div>
                     </div>
                     <div class="col-span-2 md:col-span-3 text-right">
                         <div class="text-xl md:text-5xl font-black timer-font text-emerald-400">
@@ -153,6 +155,7 @@
                         </div>
                         <div class="hidden md:block text-[10px] font-black text-slate-600 tracking-widest mt-1 uppercase">FASTEST</div>
                     </div>
+
                 </div>
             `).join('');
         }

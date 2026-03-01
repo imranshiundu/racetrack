@@ -309,13 +309,16 @@ async function computeLeaderboard(sessionId) {
     const fastestLap = lapDurations.length > 0 ? Math.min(...lapDurations) : null;
     const lastLap = lapDurations.length > 0 ? lapDurations[lapDurations.length - 1] : null;
 
+    // Current goes to 1 when the driver crosses the lap line the first time
+    const current_lap = crossings.length === 0 ? 0 : completedLaps + 1;
+
     return {
       car_number: driver.car_number,
       driver_name: driver.name,
       laps: completedLaps,
       fastest_lap_ms: fastestLap,
       last_lap_ms: lastLap,
-      current_lap: completedLaps + 1
+      current_lap: current_lap
     };
   });
 
