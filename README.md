@@ -95,7 +95,7 @@ The `leader-board`, `next-race`, `race-countdown`, and `race-flags` directories 
 
 ## Requirements
 
-- Node.js v18 or later
+- Node.js v24 or later
 - npm
 
 No external database software is needed. SQLite is bundled via the `sqlite3` npm package.
