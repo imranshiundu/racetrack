@@ -32,8 +32,13 @@ window.Racetrack = {
             });
 
             this.socket.on('connect_error', (err) => {
-                console.error('Auth failed', err.message);
-                authError.innerText = 'Incorrect Access Key or Server offline, Please try again.';
+                if (err.message === 'AUTH_FAILED') {
+                    authError.innerText = 'Incorrect access key';
+                    console.error('Auth failed', err.message);
+                } else {
+                    authError.innerText = 'Can\'t reach the server';
+                    console.error('Connection failed', err.message);
+                }
                 this.socket.disconnect();
             });
 
