@@ -17,8 +17,7 @@ A real-time race control and spectator information system for Beachside Racetrac
 9. [Socket.IO Events Reference](#socketio-events-reference)
 10. [User Guide](#user-guide)
 11. [Testing Interfaces in the Browser](#testing-interfaces-in-the-browser)
-12. [Notes for the Frontend Developer](#notes-for-the-frontend-developer)
-13. [Extra Features Implemented](#extra-features-implemented)
+12. [Extra Features Implemented](#extra-features-implemented)
 
 ---
 
@@ -53,13 +52,18 @@ beachside-racetrack/
 ├── socketHandlers.js          # All Socket.IO namespaces and event logic
 ├── db.js                      # SQLite database layer (initDb, all queries)
 ├── package.json
+├── package-lock.json
 ├── .env                       # Environment variables (not committed to git)
 ├── .gitignore
 ├── racetrack.db               # SQLite database (auto-created, not committed)
 │
+├── src/styles/
+│   └── input.css              # Tailwind CSS entry file
+│
 └── public/
     ├── socket-client.js       # Shared frontend auth + socket connection helper
     ├── styles.css             # Shared base styles (if applicable)
+    ├── dist/                  # Build output folder (Tailwind output)
     │
     ├── front-desk/            # EMPLOYEE — Receptionist
     │   ├── index.html
@@ -89,14 +93,13 @@ beachside-racetrack/
         └── index.html
 ```
 
-The `leader-board`, `next-race`, `race-countdown`, and `race-flags` directories currently each contain only an `index.html` with inline JavaScript. The frontend developer can split these into separate `script.js` and `style.css` files at their discretion — the server will serve any static file under `/public` automatically.
 
 ---
 
 ## Requirements
 
 - Node.js v24 or later
-- npm
+- (Optional) Ngrok - only needed if you want to expose the local server to other networks
 
 No external database software is needed. SQLite is bundled via the `sqlite3` npm package.
 
@@ -464,7 +467,7 @@ The `/leader-board` display at `http://<server-ip>:3000/leader-board` requires n
 - The current race session name and status.
 - A countdown timer showing time remaining.
 - The current race flag / mode.
-- A ranked table of all drivers, sorted by: most laps completed first, then fastest lap time as a tiebreaker.
+- A ranked table of all drivers, sorted by: fastest lap time.
 - Fastest lap time per driver.
 - Lap count per driver.
 
@@ -508,64 +511,6 @@ To use different keys, edit `.env` and restart the server.
 
 ---
 
-## Notes for the Frontend Developer
-
-This section explains what the backend provides and what the frontend developer is responsible for completing.
-
-### What is complete (backend + admin interfaces)
-
-- The Node.js/Express server (`server.js`)
-- SQLite database layer with full persistence (`db.js`)
-- All Socket.IO namespaces, auth middleware, and event handlers (`socketHandlers.js`)
-- The Front Desk interface (`/public/front-desk/`) — fully functional
-- The Race Control interface (`/public/race-control/`) — fully functional
-- The Lap-line Tracker interface (`/public/lap-line-tracker/`) — fully functional
-- The `socket-client.js` shared helper used by all interfaces
-
-### What requires frontend development
-
-The four public displays are currently functional but minimal. They receive all the data they need from the `state:full` event and can be extended or redesigned freely:
-
-- `/public/leader-board/index.html` — leaderboard display
-- `/public/next-race/index.html` — upcoming race driver list
-- `/public/race-countdown/index.html` — race countdown timer
-- `/public/race-flags/index.html` — full-screen flag color display
-
-Each display connects to the `/public` Socket.IO namespace (no authentication). The shared `socket-client.js` handles public connections differently from employee connections — public displays call `Racetrack.init('/public', callback)` and connect immediately without an auth overlay.
-
-### Connecting a new public display
-
-To add a new public display or modify an existing one, follow this pattern:
-
-```html
-<!-- Load socket.io client from the server -->
-<script src="/socket.io/socket.io.js"></script>
-<!-- Load the shared helper -->
-<script src="/socket-client.js"></script>
-<script>
-    // Connect to the public namespace and receive state updates
-    Racetrack.init('/public', function(state) {
-        // 'state' contains the full state object described in Socket.IO Events Reference
-        // Re-render your display here every time data changes
-        console.log(state.raceState.mode);
-        console.log(state.leaderboard);
-        console.log(state.timerRemaining);
-    });
-</script>
-```
-
-### Adding routes
-
-If you add a new page at `/public/my-display/index.html`, register its route in `server.js`:
-
-```js
-const UI_ROUTES = [
-    '/front-desk', '/race-control', '/lap-line-tracker',
-    '/leader-board', '/next-race', '/race-countdown', '/race-flags',
-    '/my-display'   // add it here
-];
-```
-
 ### State object field reference (for frontend use)
 
 | Field                     | Type              | Description                                                  |
@@ -580,12 +525,12 @@ const UI_ROUTES = [
 | `leaderboard[n].car_number`   | number        | Car number (1-8)                                             |
 | `leaderboard[n].driver_name`  | string        | Driver's name                                                |
 | `leaderboard[n].laps`         | number        | Completed laps                                               |
-| `leaderboard[n].fastest_lap_ms` | number or null | Fastest lap time in ms                                   |
-| `leaderboard[n].current_lap`  | number        | Current lap number (completed laps + 1)                      |
+| `leaderboard[n].fastest_lap_ms` | number or null | Fastest lap time in ms                                    |
+| `leaderboard[n].current_lap`  | number        | Current lap number                                           |
 | `nextSession`             | object or null    | The first pending session                                    |
 | `nextDrivers`             | array             | Drivers registered in the next session                       |
 | `lastSession`             | object or null    | The most recently ended session                              |
-| `lastLeaderboard`         | array             | Leaderboard for the last ended session (shown between races)  |
+| `lastLeaderboard`         | array             | Leaderboard for the last ended session (shown between races) |
 | `pendingSessions`         | array             | All sessions with status `pending`                           |
 | `allPendingDrivers`       | object            | Map of session ID to driver array for all pending sessions   |
 
