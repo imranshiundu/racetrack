@@ -286,6 +286,10 @@ async function setupSockets(ioServer, raceDurationMs) {
 
         const trimmedName = (name || '').trim();
         if (!trimmedName) return socket.emit('error:msg', 'Driver name cannot be empty');
+        if (!/^[a-zA-Z\s\-']+$/.test(trimmedName)) {
+          return socket.emit('error:msg', 'Driver name can only contain letters');
+        }
+        if (trimmedName.length > 30) return socket.emit('error:msg', 'Driver name cannot exceed 30 characters');
         if (await driverNameExists(driver.session_id, trimmedName, driverId)) {
           return socket.emit('error:msg', `A driver named "${trimmedName}" already exists`);
         }
